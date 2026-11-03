@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f8">
+  <title>Support Desk | Operations dashboard</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <section class="login-screen" id="login-screen" hidden>
+    <form class="login-card" id="login-form">
+      <a class="brand login-brand" href="/" aria-label="Support Desk">
+        <span class="brand-mark">S</span><span class="brand-name">support<span>desk</span></span>
+      </a>
+      <p class="eyebrow">SUPPORT OPERATIONS</p>
+      <h1>Welcome back</h1>
+      <p class="login-copy">Sign in to manage support requests and your team's work.</p>
+      <label class="field-label" for="login-username">Username</label>
+      <input id="login-username" name="username" autocomplete="username" required>
+      <label class="field-label" for="login-password">Password</label>
+      <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      <p class="form-error" id="login-error" role="alert" hidden></p>
+      <button class="submit-button login-submit" type="submit">Sign in <span aria-hidden="true">→</span></button>
+    </form>
+  </section>
+
+  <div class="app-shell" id="app-shell" hidden>
+    <aside class="sidebar" aria-label="Application navigation">
+      <a class="brand" href="#" aria-label="Support Desk home">
+        <span class="brand-mark">S</span><span class="brand-name">support<span>desk</span></span>
+      </a>
+      <div class="workspace-label">WORKSPACE</div>
+      <button class="nav-item active" type="button" data-page="dashboard">
+        <span class="nav-icon dashboard-icon" aria-hidden="true"></span>Dashboard
+      </button>
+      <button class="nav-item" type="button" data-page="triage" id="nav-triage">
+        <span class="nav-icon triage-icon" aria-hidden="true"></span>New triage
+      </button>
+      <button class="nav-item" type="button" data-page="users" id="nav-users" hidden>
+        <span class="nav-icon users-icon" aria-hidden="true"></span>Team & roles
+      </button>
+      <div class="sidebar-bottom">
+        <div class="corpus-card">
+          <div class="corpus-heading"><span class="corpus-dot"></span>Knowledge base</div>
+          <p>Responses grounded in your support documentation.</p>
+          <div class="corpus-companies"><span>HackerRank</span><span>Claude</span><span>Visa</span></div>
+        </div>
+        <div class="local-note"><span class="lock-icon"></span>Local data · SQLite</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-divider">/</span><strong id="page-title">Dashboard</strong></div>
+        <div class="account-menu">
+          <div class="account-copy"><strong id="account-name"></strong><span id="account-role"></span></div>
+          <button class="text-button" type="button" id="logout-button">Sign out</button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <section class="page-view" id="dashboard-page">
+          <div class="page-heading">
+            <div><p class="eyebrow">SUPPORT OPERATIONS</p><h1>Ticket dashboard</h1>
+              <p>Track incoming queries, triage outcomes, and your team's workload.</p></div>
+            <button class="submit-button" type="button" data-page="triage">New ticket <span aria-hidden="true">+</span></button>
+          </div>
+          <div class="stats-grid" id="stats-grid" aria-live="polite"></div>
+          <section class="panel company-panel">
+            <div class="panel-heading"><div><h2>Queries by company</h2><p>Volume and resolution at a glance.</p></div></div>
+            <div class="table-scroll"><table>
+              <thead><tr><th>Company</th><th>Queries</th><th>Triaged</th><th>Escalated</th><th>Resolved</th></tr></thead>
+              <tbody id="company-stats"></tbody>
+            </table></div>
+          </section>
+          <section class="panel tickets-panel">
+            <div class="panel-heading"><div><h2>Recent tickets</h2><p>View requests, suggested responses, and update work status.</p></div>
+              <button class="text-button" id="refresh-button" type="button">Refresh</button></div>
+            <div class="filters">
+              <input id="ticket-search" type="search" placeholder="Search message or ticket ID" aria-label="Search tickets">
+              <select id="company-filter" aria-label="Filter by company">
+                <option value="">All companies</option><option>HackerRank</option><option>Claude</option><option>Visa</option><option>Unspecified</option>
+              </select>
+              <select id="workflow-filter" aria-label="Filter by workflow status">
+                <option value="">All work statuses</option><option value="open">Open</option>
+                <option value="in_progress">In progress</option><option value="resolved">Resolved</option>
+              </select>
+            </div>
+            <div class="table-scroll"><table class="tickets-table">
+              <thead><tr><th>Ticket</th><th>Company</th><th>AI outcome</th><th>Work status</th><th>Assigned to</th><th>Created</th><th></th></tr></thead>
+              <tbody id="ticket-rows"></tbody>
+            </table></div>
+            <p class="empty-state" id="tickets-empty" hidden>No tickets match these filters yet.</p>
+            <p class="table-note">Showing the latest 500 tickets. Full query and response are available under each ticket.</p>
+          </section>
+        </section>
+
+        <section class="page-view" id="triage-page" hidden>
+          <div class="page-heading">
+            <div><p class="eyebrow">AI-POWERED SUPPORT OPERATIONS</p><h1>New customer query</h1>
+              <p>Get a grounded response or route sensitive issues to a human.</p></div>
+          </div>
+          <section class="workspace-grid" aria-label="Customer triage">
+            <div class="form-column">
+              <form class="query-card" id="triage-form">
+                <div class="card-heading"><div><div class="step-label">NEW CUSTOMER QUERY</div>
+                  <h2>What can we help with?</h2></div><span class="single-ticket">Saved to ticket history</span></div>
+                <label class="field-label" for="company">Company <span class="optional">(optional)</span></label>
+                <div class="select-wrap"><select id="company" name="company">
+                  <option value="">Not specified</option><option value="HackerRank">HackerRank</option>
+                  <option value="Claude">Claude</option><option value="Visa">Visa</option>
+                </select><span class="select-chevron"></span></div>
+                <div class="query-label-row"><label class="field-label" for="query">Customer's message</label>
+                  <span class="required-note">Required</span></div>
+                <div class="textarea-wrap"><textarea id="query" name="query" maxlength="4000" required
+                  placeholder="Describe the customer's issue or question in their own words..."
+                  aria-describedby="query-hint character-count"></textarea>
+                  <div class="textarea-footer"><span id="query-hint">Include details that help explain the issue.</span>
+                    <span id="character-count">0 / 4,000</span></div></div>
+                <div class="examples"><span class="examples-label">TRY AN EXAMPLE</span>
+                  <button class="example-chip" type="button" data-company="HackerRank" data-query="I can't access my HackerRank account after my admin removed my seat.">Account access</button>
+                  <button class="example-chip" type="button" data-company="Visa" data-query="My Visa card was stolen and there are transactions I don't recognize.">Card security</button>
+                  <button class="example-chip" type="button" data-company="Claude" data-query="All Claude requests through Amazon Bedrock are failing.">Service issue</button>
+                </div>
+                <div class="form-bottom"><p class="privacy-note"><span class="shield-icon"></span>Stored locally in the team's ticket database.</p>
+                  <button class="submit-button" id="submit-button" type="submit">
+                    <span class="button-label">Run triage</span><span class="button-arrow">→</span></button></div>
+              </form>
+              <div class="error-banner" id="error-banner" role="alert" hidden>
+                <span class="error-icon">!</span><p id="error-message"></p>
+                <button type="button" id="dismiss-error" aria-label="Dismiss error">×</button></div>
+              <div class="loading-card" id="loading-card" role="status" aria-live="polite" hidden>
+                <span class="loading-spinner"></span><div><strong>Reviewing the customer query</strong>
+                <span>Classifying, checking documentation, and preparing a grounded response.</span></div></div>
+              <section class="result-card" id="result-card" aria-live="polite" hidden>
+                <div class="result-heading"><div><div class="step-label">TRIAGE RESULT</div><h2>Ticket <span id="result-ticket-id"></span></h2></div>
+                  <button class="text-button" type="button" id="open-dashboard">View dashboard ↗</button></div>
+                <div class="result-meta" id="result-meta"></div>
+                <div class="response-panel"><div class="response-title"><span class="response-icon">✳</span>
+                  <h3>Suggested response</h3><button class="copy-button" id="copy-response" type="button">Copy response</button></div>
+                  <p id="response-text"></p></div>
+                <div class="justification-panel"><span class="justification-mark">i</span>
+                  <div><strong>Why this decision</strong><p id="justification-text"></p></div></div>
+                <details class="query-review"><summary>Review customer query</summary><p id="query-review-text"></p></details>
+              </section>
+            </div>
+            <aside class="guide-column"><section class="guide-card"><div class="guide-top">
+              <span class="guide-icon">✳</span><span class="guide-tag">HOW IT WORKS</span></div>
+              <h2>Good support starts with understanding.</h2>
+              <p>Each query moves through a careful review before a response is suggested.</p>
+              <div class="process-list">
+                <div class="process-step"><span class="process-number">1</span><div><strong>Understand</strong><span>Identify topic, urgency, and intent.</span></div></div>
+                <div class="process-step"><span class="process-number">2</span><div><strong>Find guidance</strong><span>Search the relevant support knowledge base.</span></div></div>
+                <div class="process-step"><span class="process-number">3</span><div><strong>Respond or route</strong><span>Offer grounded help or flag for a human.</span></div></div>
+              </div><div class="guide-footnote">Sensitive cases are routed to human support.</div></section>
+              <section class="trust-card"><span class="trust-mark">✓</span><div><strong>Grounded by design</strong>
+                <p>Responses use support docs. When guidance isn't available, the system won't guess.</p></div></section></aside>
+          </section>
+        </section>
+
+        <section class="page-view" id="users-page" hidden>
+          <div class="page-heading"><div><p class="eyebrow">WORKSPACE ADMINISTRATION</p><h1>Team & roles</h1>
+            <p>Create accounts and assign least-privilege access to your support team.</p></div></div>
+          <section class="panel user-create-panel">
+            <div class="panel-heading"><div><h2>Add a team member</h2><p>New passwords must be at least 12 characters.</p></div></div>
+            <form id="user-form" class="user-form">
+              <label>Username<input name="username" minlength="3" maxlength="40" required></label>
+              <label>Temporary password<input name="password" type="password" minlength="12" required></label>
+              <label>Role<select name="role" required><option value="agent">Agent</option>
+                <option value="supervisor">Supervisor</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></label>
+              <button class="submit-button" type="submit">Create account</button>
+            </form><p class="form-feedback" id="user-feedback" role="status"></p>
+          </section>
+          <section class="panel"><div class="panel-heading"><div><h2>Accounts</h2>
+            <p>Agents handle assigned tickets; viewers have read-only access.</p></div></div>
+            <div class="table-scroll"><table><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>
+              <tbody id="user-rows"></tbody></table></div></section>
+          <section class="panel role-guide"><div class="panel-heading"><div><h2>Role permissions</h2></div></div>
+            <div class="role-grid">
+              <div><strong>Admin</strong><p>Full ticket access, assignments, workflow, and account management.</p></div>
+              <div><strong>Supervisor</strong><p>Review and update all tickets; assign work to agents.</p></div>
+              <div><strong>Agent</strong><p>Submit queries and update unassigned or assigned tickets.</p></div>
+              <div><strong>Viewer</strong><p>Read-only dashboard and ticket history.</p></div>
+            </div></section>
+        </section>
+        <footer class="page-footer"><span>SUPPORT DESK</span><span>Thoughtful customer care, together</span></footer>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

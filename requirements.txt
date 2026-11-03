@@ -1,0 +1,9 @@
+langgraph
+langchain-core
+langchain-groq
+langchain-google-genai
+chromadb
+pandas
+python-dotenv
+groq
+httpx
